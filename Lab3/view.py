@@ -9,11 +9,16 @@ from PySide6.QtCore import Qt, QDate
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis, QDateTimeAxis
 from PySide6.QtGui import QAction, QPainter
 from datetime import datetime
+from PySide6.QtGui import QFont
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Отслеживание сна - ваш персональный дневник сна")
+
+        font = QFont("Arial", 14)
+        self.setFont(font)
+
+        self.setWindowTitle("Отслеживание сна / персональный дневник сна")
         self.setGeometry(100,100,1200,800)
         # Центральный виджет и основной макет
         central_widget = QWidget()
@@ -82,20 +87,20 @@ class MainWindow(QMainWindow):
         self.add_button = QPushButton("Добавить запись о сне")
         self.add_button.setStyleSheet("""
             QPushButton {
-                background-color: #4CAF50;
+                background-color: #2196F3;
                 color: white;
                 font-weight: bold;
-                padding: 8px;
-                border-radius: 4px;
+                padding: 10px;
+                border-radius: 10px;
             }
             QPushButton:hover {
-                background-color: #45a049;
+                background-color: #555555;
             }
         """)
 
         # Добавляем виджеты в layout
         input_layout.addRow(QLabel("Дата сна:"), self.date_edit)
-        input_layout.addRow(QLabel("Продолжительность (часы):"), self.duration_edit)
+        input_layout.addRow(QLabel("Продолжительность (в часах):"), self.duration_edit)
         input_layout.addRow(QLabel("Качество сна (1-10):"), self.quality_edit)
         input_layout.addRow(QLabel("Заметки:"), self.notes_edit)
         input_layout.addRow(self.add_button)
@@ -236,4 +241,4 @@ class MainWindow(QMainWindow):
 
     # Обновляет статус бар
     def update_status(self, message):
-        self.status_bar.showMessage(f"📊 {message}")
+        self.status_bar.showMessage(f"{message}")
