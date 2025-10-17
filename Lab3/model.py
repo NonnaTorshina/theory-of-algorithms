@@ -17,34 +17,34 @@ class SleepRecord:
         self._validate() # Валидация данных при создании объекта
 
         # Валидация данных записи, вызывает исключения при ошибках
-        def validate(self):
+    def _validate(self):
 
-            # Проверка длительности сна
-            if self.duration_hours <= 0:
-                raise InvalidDurationError("Продолжительность сна должна быть больше 0 часов")
-            if self.duration_hours > 24:
-                raise InvalidDurationError("Продолжительность сна не может превышать 24 часа")
+        # Проверка длительности сна
+        if self.duration_hours <= 0:
+            raise InvalidDurationError("Продолжительность сна должна быть больше 0 часов")
+        if self.duration_hours > 24:
+            raise InvalidDurationError("Продолжительность сна не может превышать 24 часа")
 
-            # Проверка даты
-            if self.sleep_date > date.today():
-                raise InvalidDateError("Дата сна не может быть в будущем")
+        # Проверка даты
+        if self.sleep_date > date.today():
+            raise InvalidDateError("Дата сна не может быть в будущем")
 
-            # Проверка качетсва сна
-            if not (1 <= self.quality <= 10):
-                raise InvalidQualityError("Качество сна должно быть оценено от 1 до 10")
+        # Проверка качетсва сна
+        if not (1 <= self.quality <= 10):
+            raise InvalidQualityError("Качество сна должно быть оценено от 1 до 10")
 
-            # Возвращает данные записи в виде списка для отображения в табице
-            def to_list(self):
-                return [
-                    self.sleep_date.strftime("%Y-%m-%d"),
-                    f"{self.duration_hours:.1f}",
-                    str(self.quality),
-                    self.notes
-                ]
+        # Возвращает данные записи в виде списка для отображения в табице
+    def to_list(self):
+        return [
+            self.sleep_date.strftime("%Y-%m-%d"),
+            f"{self.duration_hours:.1f}",
+            str(self.quality),
+            self.notes
+        ]
 
-            # Строковое представление записи для отладки
-            def __str__(self):
-                return f"SleepRecord{self.sleep_date}, {self.duration_hours}ч, качество сна: {self.quality}"
+    # Строковое представление записи для отладки
+    def __str__(self):
+        return f"SleepRecord{self.sleep_date}, {self.duration_hours}ч, качество сна: {self.quality}"
 
 
 #Класс модель, управляющий коллекцией записей о сне
