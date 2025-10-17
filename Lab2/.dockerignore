@@ -1,0 +1,35 @@
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+venv_library/
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Системные
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Документы и БД (чтобы не копировать в образ)
+*.db
+*.docx
+*.xlsx
+reports/
+README.md
+
+# Docker
+Dockerfile
+.dockerignore

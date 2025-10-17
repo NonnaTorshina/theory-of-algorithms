@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  library-app:
+    build: .
+    container_name: electronic-library
+    volumes:
+      - ./reports:/app/reports
+      - ./Library.db:/app/Library.db
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: python -u main.py

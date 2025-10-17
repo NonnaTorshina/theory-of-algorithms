@@ -268,12 +268,12 @@ class DatabaseManager:
                 })
             return reports
 
+    #Проверяет содержимое БД
     def check_database(self):
-        """Проверяет содержимое БД"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
 
-            print("\n=== ПРОВЕРКА БАЗЫ ДАННЫХ ===")
+            print("\n ПРОВЕРКА БАЗЫ ДАННЫХ ")
 
             # Проверяем таблицы
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")

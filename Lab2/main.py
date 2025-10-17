@@ -2,12 +2,17 @@ from lib_package.models import Book, Reader, Subscription
 from lib_package.services import StatisticsService, LibraryService
 from lib_package.utils import ReportGenerator
 from lib_package.database import DatabaseManager
-
+import os
 # Основная функция программы
 def main():
     print("-" * 50)
     print("    Электронная библиотека. Вариант №20 ")
     print("-" * 50)
+
+    if os.path.exists("/app/Library.db"):
+        db_path = "/app/Library.db"
+    else:
+        db_path = "Library.db"
 
     db_manager = DatabaseManager("Library.db")
     library_service = LibraryService(db_manager)
