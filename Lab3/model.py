@@ -5,6 +5,7 @@
 from datetime import date, timedelta
 from custom_exceptions import InvalidDurationError, InvalidDateError, InvalidQualityError
 
+
 # Класс, представляющий одну запись о сне
 class SleepRecord:
 
@@ -51,40 +52,32 @@ class SleepRecord:
 class SleepTrackerModel:
 
     def __init__(self):
-        self.records = []
+        from database import DatabaseManager
+        self.db = DatabaseManager()
 
-    # Добавляем новую запись о сне
+    # Добавляет новую запись о сне в базу данных
     def add_record(self, record: SleepRecord):
-        self.records.append(record)
-        # Сортировка по дате (сверху будут новые)
-        self.records.sort(key = lambda r: r.sleep_date, reverse=True)
 
-    # Возвращает все записи
+        self.db.add_sleep_record(record)
+    # Возвращает все записи из базы данных
     def get_all_records(self):
-        return self.records.copy() #для безопасности вовзвращаем копию
+        return self.db.get_all_records()
 
     # Возвращает количество записей
     def get_records_count(self):
-        return len(self.records)
+        return self.db.get_records_count()
 
-    # Рассчитывает среднюю продолжительность сна за послдение 7 дней
+    # Рассчитывает среднюю продолжительность сна за последние 7 дней
     def get_weekly_average(self):
-        last_week = date.today() - timedelta(days=7)
-        recent_records = [r for r in self.records if r.sleep_date >= last_week]
+        return self.db.get_weekly_average()
 
-        if not recent_records:
-            return 0.0
-
-        total_duration = sum(r.duration_hours for r in recent_records)
-        return total_duration / len(recent_records)
-
-
-    # Возвращает последню добавленную запись или none
+    # Возвращает последнюю добавленную запись или None
     def get_last_record(self):
-        return self.records[0] if self.records else None
+        all_records = self.get_all_records()
+        return all_records[0] if all_records else None
 
-    # Очищает все записи (нужно для тестирования)
+    # Очищает все записи (для тестирования)
     def clear_all_records(self):
-        self.records.clear()
+        self.db.clear_all_records()
 
 
