@@ -2,7 +2,6 @@
 import sqlite3
 from datetime import date
 from contextlib import contextmanager
-from model import SleepRecord
 
 
 class DatabaseManager:
@@ -36,7 +35,7 @@ class DatabaseManager:
             conn.commit()
 
     # Добавляет запись о сне в базу данных
-    def add_sleep_record(self, record: SleepRecord):
+    def add_sleep_record(self, record):
         with self._get_connection() as conn:
             cursor = conn.execute("""
                 INSERT INTO sleep_records (sleep_date, duration_hours, quality, notes)
@@ -56,6 +55,7 @@ class DatabaseManager:
             records = []
             for row in cursor:
                 sleep_date = date.fromisoformat(row['sleep_date'])
+                from model import SleepRecord
                 record = SleepRecord(
                     sleep_date=sleep_date,
                     duration_hours=row['duration_hours'],

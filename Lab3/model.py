@@ -2,20 +2,22 @@
 
 # Содержит классы для работы с записями о сне и статистикой
 
-from datetime import date, timedelta
+from datetime import date
 from custom_exceptions import InvalidDurationError, InvalidDateError, InvalidQualityError
 
 
 # Класс, представляющий одну запись о сне
 class SleepRecord:
 
-    def __init__ (self, sleep_date: date, duration_hours: float, quality: int, notes: str = ""):
+    def __init__(self, sleep_date: date, duration_hours: float, quality: int, notes: str = ""):
         self.sleep_date = sleep_date
         self.duration_hours = duration_hours
-        self.quality = quality #для оценки качества сна от 1 до 10
+        # для оценки качества сна от 1 до 10
+        self.quality = quality
         self.notes = notes
 
-        self._validate() # Валидация данных при создании объекта
+        # Валидация данных при создании объекта
+        self._validate()
 
         # Валидация данных записи, вызывает исключения при ошибках
     def _validate(self):
@@ -48,7 +50,7 @@ class SleepRecord:
         return f"SleepRecord{self.sleep_date}, {self.duration_hours}ч, качество сна: {self.quality}"
 
 
-#Класс модель, управляющий коллекцией записей о сне
+# Класс модель, управляющий коллекцией записей о сне
 class SleepTrackerModel:
 
     def __init__(self):
@@ -60,6 +62,7 @@ class SleepTrackerModel:
 
         self.db.add_sleep_record(record)
     # Возвращает все записи из базы данных
+
     def get_all_records(self):
         return self.db.get_all_records()
 
@@ -79,5 +82,3 @@ class SleepTrackerModel:
     # Очищает все записи (для тестирования)
     def clear_all_records(self):
         self.db.clear_all_records()
-
-
