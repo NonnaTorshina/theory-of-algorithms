@@ -1,18 +1,11 @@
-version: '3.8'
-
 services:
-  database:
-    image: postgres:13
-    container_name: sleep-tracker-db
-    environment:
-      POSTGRES_DB: sleep_tracker
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
+  sleep-tracker:
+    build: .
+    container_name: sleep-tracker-app
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-
-volumes:
-  postgres_data:
+      - ./sleep_tracker.db:/app/sleep_tracker.db
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONUNBUFFERED: 1

@@ -2,20 +2,20 @@
 import sqlite3
 from datetime import date
 from contextlib import contextmanager
-
+import os
 
 class DatabaseManager:
 
-    def __init__(self, db_name = "sleep_tracker.db"):
+    def __init__(self, db_name="sleep_tracker.db"):
+        # Используем путь в текущей директории
         self.db_name = db_name
         self._create_tables()
 
     # Контекстный менеджер для подключения к БД
     @contextmanager
     def _get_connection(self):
-
         conn = sqlite3.connect(self.db_name)
-        conn.row_factory = sqlite3.Row # Чтобы получить данные, как словарь
+        conn.row_factory = sqlite3.Row
         try:
             yield conn
         finally:

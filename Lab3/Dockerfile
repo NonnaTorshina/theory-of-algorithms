@@ -1,17 +1,12 @@
-# Используем официальный Python образ
 FROM python:3.8-slim
 
-# Устанавливаем рабочую директорию
+# Установка SQLite3 (обычно уже есть в базовом образе)
+RUN apt-get update && apt-get install -y sqlite3 && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
-
-# Копируем файл зависимостей
 COPY requirements.txt .
-
-# Устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем весь проект
 COPY . .
 
-# Указываем команду для запуска
 CMD ["python", "main.py"]
