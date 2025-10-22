@@ -1,0 +1,56 @@
+{% extends 'sleep_tracker/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1>Добавить запись о сне</h1>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="{{ form.sleep_date.id_for_label }}" class="form-label">
+                    {{ form.sleep_date.label }}
+                </label>
+                {{ form.sleep_date }}
+                {% if form.sleep_date.errors %}
+                    <div class="text-danger">{{ form.sleep_date.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.duration_hours.id_for_label }}" class="form-label">
+                    {{ form.duration_hours.label }}
+                </label>
+                {{ form.duration_hours }}
+                {% if form.duration_hours.errors %}
+                    <div class="text-danger">{{ form.duration_hours.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.quality.id_for_label }}" class="form-label">
+                    {{ form.quality.label }}
+                </label>
+                {{ form.quality }}
+                {% if form.quality.errors %}
+                    <div class="text-danger">{{ form.quality.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">
+                    {{ form.notes.label }}
+                </label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <div class="text-danger">{{ form.notes.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить запись</button>
+            <a href="{% url 'sleep_records' %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

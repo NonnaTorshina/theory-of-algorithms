@@ -1,0 +1,122 @@
+{% extends 'sleep_tracker/base.html' %}
+
+{% block content %}
+<h1>Статистика сна</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Общая статистика</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Всего записей:</strong> {{ total_records }}</p>
+                <p><strong>Средняя продолжительность:</strong> {{ avg_duration|floatformat:2 }} ч</p>
+                <p><strong>Среднее качество:</strong> {{ avg_quality|floatformat:1 }}/5</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Статистика за неделю</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Записей за неделю:</strong> {{ weekly_records }}</p>
+                <p><strong>Среднее за неделю:</strong> {{ weekly_avg|floatformat:2 }} ч</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>График продолжительности сна</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="durationChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Качество сна</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="qualityChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подключаем Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Данные из Django
+    const chartDates = {{ chart_dates|safe }};
+    const chartDurations = {{ chart_durations|safe }};
+    const chartQuality = {{ chart_quality|safe }};
+
+    // График продолжительности сна
+    const durationCtx = document.getElementById('durationChart').getContext('2d');
+    const durationChart = new Chart(durationCtx, {
+        type: 'line',
+        data: {
+            labels: chartDates,
+            datasets: [{
+                label: 'Часы сна',
+                data: chartDurations,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Часы'
+                    }
+                }
+            }
+        }
+    });
+
+    // График качества сна
+    const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+    const qualityChart = new Chart(qualityCtx, {
+        type: 'bar',
+        data: {
+            labels: chartDates,
+            datasets: [{
+                label: 'Качество',
+                data: chartQuality,
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5,
+                    title: {
+                        display: true,
+                        text: 'Оценка'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'sleep_tracker/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h1>Добавить запись о сне</h1>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Дата сна</label>
+                <input type="date" name="sleep_date" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Продолжительность (часы)</label>
+                <input type="number" name="duration_hours" step="0.5" min="0" max="24" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Качество сна</label>
+                <select name="quality" class="form-control" required>
+                    <option value="1">⭐ Очень плохо</option>
+                    <option value="2">⭐⭐ Плохо</option>
+                    <option value="3" selected>⭐⭐⭐ Нормально</option>
+                    <option value="4">⭐⭐⭐⭐ Хорошо</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Отлично</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Заметки</label>
+                <textarea name="notes" class="form-control" rows="3" placeholder="Дополнительные заметки..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить запись</button>
+            <a href="{% url 'sleep_records' %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
