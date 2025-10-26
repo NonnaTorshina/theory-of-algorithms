@@ -1,11 +1,14 @@
+version: '3.8'
+
 services:
   sleep-tracker:
     build: .
-    container_name: sleep-tracker-app
-    volumes:
-      - ./sleep_tracker.db:/app/sleep_tracker.db
-      - ./data:/app/data
     ports:
-      - "8000:8000"
+      - "8000:8000"  # или другой порт, который использует ваше приложение
+    volumes:
+      - sleep_tracker_data:/data
     environment:
-      PYTHONUNBUFFERED: 1
+      - DATABASE_PATH=/data/sleep_tracker.db
+
+volumes:
+  sleep_tracker_data:
