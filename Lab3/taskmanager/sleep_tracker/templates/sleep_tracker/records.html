@@ -3,8 +3,56 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <h1>Добавить запись о сне</h1>
-
+       <h1 class="display-5 fw-bold mb-3">Добро пожаловать! Ваши данные:</h1>
+{% if records %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table">
+                                <tr>
+                                    <th>Дата сна</th>
+                                    <th>Продолжительность (часы)</th>
+                                    <th>Качество сна</th>
+                                    <th>Заметки</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in records %}
+                                <tr>
+                                    <td class="fw-semibold">{{ record.sleep_date }}</td>
+                                    <td>{{ record.duration_hours }}</td>
+                                    <td>
+                                        {% if record.quality == 1 %}
+                                            Очень плохо
+                                        {% elif record.quality == 2 %}
+                                            Плохо
+                                        {% elif record.quality == 3 %}
+                                        Нормально
+                                        {% elif record.quality == 4 %}
+                                            Хорошо
+                                        {% elif record.quality == 5 %}
+                                            Отлично
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.notes %}
+                                            {{ record.notes }}
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center">
+                        <h4>Записей пока нет</h4>
+                        <p>База данных пуста</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
         <form method="post">
             {% csrf_token %}
 
@@ -48,8 +96,7 @@
                 {% endif %}
             </div>
 
-            <button type="submit" class="btn btn-primary">Сохранить запись</button>
-            <a href="{% url 'sleep_records' %}" class="btn btn-secondary">Отмена</a>
+
         </form>
     </div>
 </div>

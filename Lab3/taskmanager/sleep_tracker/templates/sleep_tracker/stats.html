@@ -1,53 +1,138 @@
 {% extends 'sleep_tracker/base.html' %}
 
 {% block content %}
-<h1>Статистика сна</h1>
-
 <div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5>Общая статистика</h5>
-            </div>
+    <div class="col-12">
+        <div class="welcome-section">
+            <h1 class="display-5 fw-bold mb-3">Статистика вашего сна</h1>
+            <p class="lead">Анализируйте ваши привычки сна для улучшения качества отдыха</p>
+        </div>
+    </div>
+</div>
+
+<!-- Основная статистика -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-center">
             <div class="card-body">
-                <p><strong>Всего записей:</strong> {{ total_records }}</p>
-                <p><strong>Средняя продолжительность:</strong> {{ avg_duration|floatformat:2 }} ч</p>
-                <p><strong>Среднее качество:</strong> {{ avg_quality|floatformat:1 }}/5</p>
+                <div class="feature-icon mx-auto">
+                    <i class="bi bi-clock-history text-white"></i>
+                </div>
+                <h3 class="stats-number">{{ avg_duration|floatformat:1 }}ч</h3>
+                <p class="text-muted mb-0">Средняя продолжительность</p>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5>Статистика за неделю</h5>
-            </div>
+    <div class="col-md-3">
+        <div class="card text-center">
             <div class="card-body">
-                <p><strong>Записей за неделю:</strong> {{ weekly_records }}</p>
-                <p><strong>Среднее за неделю:</strong> {{ weekly_avg|floatformat:2 }} ч</p>
+                <div class="feature-icon mx-auto">
+                    <i class="bi bi-star text-white"></i>
+                </div>
+                <h3 class="stats-number">{{ avg_quality|floatformat:1 }}</h3>
+                <p class="text-muted mb-0">Среднее качество</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="feature-icon mx-auto">
+                    <i class="bi bi-journal-check text-white"></i>
+                </div>
+                <h3 class="stats-number">{{ total_records }}</h3>
+                <p class="text-muted mb-0">Всего записей</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="feature-icon mx-auto">
+                    <i class="bi bi-calendar-week text-white"></i>
+                </div>
+                <h3 class="stats-number">{{ weekly_records }}</h3>
+                <p class="text-muted mb-0">За неделю</p>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Графики -->
 <div class="row mt-4">
-    <div class="col-md-8">
+    <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                <h5>График продолжительности сна</h5>
+                <h5 class="mb-0"><i></i>Динамика продолжительности сна</h5>
             </div>
             <div class="card-body">
-                <canvas id="durationChart" height="250"></canvas>
+                <canvas id="durationChart" height="300"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+
+    <div class="col-lg-4">
         <div class="card">
             <div class="card-header">
-                <h5>Качество сна</h5>
+                <h5 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Качество сна</h5>
             </div>
             <div class="card-body">
-                <canvas id="qualityChart" height="250"></canvas>
+                <canvas id="qualityChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Дополнительная аналитика -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i></i>Рекомендации</h5>
+            </div>
+            <div class="card-body">
+                {% if avg_duration < 7 %}
+                <div class="alert alert-warning">
+                    <strong>Совет:</strong> Старайтесь спать 7-9 часов для оптимального восстановления
+                </div>
+                {% elif avg_duration > 9 %}
+                <div class="alert alert-info">
+                    <strong>Совет:</strong> Избыток сна может быть признаком проблем со здоровьем
+                </div>
+                {% else %}
+                <div class="alert alert-success">
+                    <strong>Отлично!</strong> Вы поддерживаете здоровую продолжительность сна
+                </div>
+                {% endif %}
+
+                {% if avg_quality < 3 %}
+                <div class="alert alert-warning">
+                    <strong> Совет:</strong> Попробуйте техники релаксации перед сном
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-range me-2"></i>Недельная статистика</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="stats-number">{{ weekly_avg|floatformat:1 }}ч</h4>
+                        <p class="text-muted">Среднее за неделю</p>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="stats-number">{{ weekly_records }}/7</h4>
+                        <p class="text-muted">Дней отслежено</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -70,20 +155,52 @@
             datasets: [{
                 label: 'Часы сна',
                 data: chartDurations,
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.1,
-                fill: true
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#6366f1',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
             }]
         },
         options: {
             responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 14
+                    }
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
                     title: {
                         display: true,
-                        text: 'Часы'
+                        text: 'Часы сна',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
                     }
                 }
             }
@@ -97,22 +214,52 @@
         data: {
             labels: chartDates,
             datasets: [{
-                label: 'Качество',
+                label: 'Качество сна',
                 data: chartQuality,
-                backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                borderColor: 'rgb(255, 99, 132)',
-                borderWidth: 1
+                backgroundColor: [
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(99, 102, 241, 0.7)',
+                    'rgba(6, 182, 212, 0.7)',
+                    'rgba(34, 197, 94, 0.7)',
+                    'rgba(234, 179, 8, 0.7)'
+                ],
+                borderColor: [
+                    'rgb(139, 92, 246)',
+                    'rgb(99, 102, 241)',
+                    'rgb(6, 182, 212)',
+                    'rgb(34, 197, 94)',
+                    'rgb(234, 179, 8)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8
             }]
         },
         options: {
             responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
                     max: 5,
+                    ticks: {
+                        stepSize: 1
+                    },
                     title: {
                         display: true,
-                        text: 'Оценка'
+                        text: 'Оценка качества',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45
                     }
                 }
             }

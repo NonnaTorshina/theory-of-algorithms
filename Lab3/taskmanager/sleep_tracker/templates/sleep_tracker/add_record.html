@@ -2,41 +2,101 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <h1>Добавить запись о сне</h1>
-
-        <form method="post">
-            {% csrf_token %}
-
-            <div class="mb-3">
-                <label class="form-label">Дата сна</label>
-                <input type="date" name="sleep_date" class="form-control" required>
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2 class="mb-0"><i></i>Добавить запись о сне</h2>
             </div>
+            <div class="card-body p-4">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
 
-            <div class="mb-3">
-                <label class="form-label">Продолжительность (часы)</label>
-                <input type="number" name="duration_hours" step="0.5" min="0" max="24" class="form-control" required>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Дата сна</label>
+                        <input type="date" name="sleep_date" class="form-control form-control-lg" required>
+                        <div class="form-text">Выберите дату, когда вы легли спать</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold"> Продолжительность сна</label>
+                        <div class="input-group">
+                            <input type="number" name="duration_hours" step="0.5" min="0" max="24"
+                                   class="form-control form-control-lg" placeholder="7.5" required>
+                            <span class="input-group-text bg-light">часов</span>
+                        </div>
+                        <div class="form-text">Введите продолжительность в часах (например, 7.5)</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold"> Качество сна</label>
+                        <select name="quality" class="form-select form-select-lg" required>
+                            <option value="1">Очень плохо</option>
+                            <option value="2"> Плохо</option>
+                            <option value="3" selected>Нормально</option>
+                            <option value="4">Хорошо</option>
+                            <option value="5"> Отлично</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold"> Заметки о сне</label>
+                        <textarea name="notes" class="form-control" rows="4"
+                                  placeholder="Опишите ваш сон, сны или что-то особенное..."></textarea>
+                        <div class="form-text">Необязательное поле для ваших заметок</div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'sleep_records' %}" class="btn btn-secondary btn-lg me-md-2">
+                            <i class="bi bi-arrow-left me-1"></i>Отмена
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save me-1"></i>Сохранить запись
+                        </button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Качество сна</label>
-                <select name="quality" class="form-control" required>
-                    <option value="1">⭐ Очень плохо</option>
-                    <option value="2">⭐⭐ Плохо</option>
-                    <option value="3" selected>⭐⭐⭐ Нормально</option>
-                    <option value="4">⭐⭐⭐⭐ Хорошо</option>
-                    <option value="5">⭐⭐⭐⭐⭐ Отлично</option>
-                </select>
+        <!-- Советы по сну -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title"><i></i>Советы для лучшего сна</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">Старайтесь ложиться и вставать в одно время</li>
+                    <li class="mb-2">Избегайте экранов за час до сна</li>
+                    <li class="mb-2">Практикуйте расслабляющие техники</li>
+                    <li class="mb-0">Поддерживайте комфортную температуру в спальне</li>
+                </ul>
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">Заметки</label>
-                <textarea name="notes" class="form-control" rows="3" placeholder="Дополнительные заметки..."></textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Сохранить запись</button>
-            <a href="{% url 'sleep_records' %}" class="btn btn-secondary">Отмена</a>
-        </form>
+        </div>
     </div>
 </div>
+
+<script>
+    // Валидация формы
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Установка сегодняшней даты по умолчанию
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.querySelector('input[name="sleep_date"]');
+        if (!dateInput.value) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+        }
+    });
+</script>
 {% endblock %}
