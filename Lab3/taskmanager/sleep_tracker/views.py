@@ -1,17 +1,36 @@
 from django.shortcuts import render, redirect
 from django.db.models import Avg, Count
+from django.core.paginator import Paginator
 from datetime import datetime, timedelta
 import json
 from .models import SleepRecord
 from .forms import SleepRecordForm
 
 
-# Главная страница со списком записей
 def sleep_records(request):
-    """Отображает все записи о сне"""
-    records = SleepRecord.objects.all().order_by('-sleep_date')
-    return render(request, 'sleep_tracker/records.html', {'records': records})
+    records_list = SleepRecord.objects.all().order_by('-sleep_date')
 
+    # Пагинация
+    paginator = Paginator(records_list, 10)
+    page_number = request.GET.get('page')
+    records = paginator.get_page(page_number)
+
+    # Статистика
+    avg_duration = SleepRecord.objects.aggregate(Avg('duration_hours'))['duration_hours__avg'] or 0
+    avg_quality = SleepRecord.objects.aggregate(Avg('quality'))['quality__avg'] or 0
+
+    # Записи за последнюю неделю
+    week_ago = datetime.now().date() - timedelta(days=7)
+    recent_count = SleepRecord.objects.filter(sleep_date__gte=week_ago).count()
+
+    context = {
+        'records': records,
+        'avg_duration': avg_duration,
+        'avg_quality': avg_quality,
+        'recent_count': recent_count,
+    }
+
+    return render(request, 'sleep_tracker/records.html', context)
 
 # Страница добавления новой записи
 def add_record(request):

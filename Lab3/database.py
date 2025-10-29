@@ -6,14 +6,19 @@ import os
 
 class DatabaseManager:
 
-    def __init__(self, db_name="sleep_tracker.db"):
-        # Используем путь в текущей директории
-        self.db_name = db_name
+    def __init__(self, db_name=None):
+        # Используем путь из переменной окружения или по умолчанию
+        self.db_name = db_name or os.getenv('DATABASE_PATH', 'sleep_tracker.db')
         self._create_tables()
 
     # Контекстный менеджер для подключения к БД
     @contextmanager
     def _get_connection(self):
+        # Создаем директорию для БД если её нет
+        db_dir = os.path.dirname(self.db_name)
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+
         conn = sqlite3.connect(self.db_name)
         conn.row_factory = sqlite3.Row
         try:
