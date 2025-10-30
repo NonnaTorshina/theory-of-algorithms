@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
         table_layout = QVBoxLayout()
 
         self.table = QTableWidget()
-        self.table.setColumnCount(4)
+        self.table.setColumnCount(2)
         self.table.setHorizontalHeaderLabels(["Дата", "Длительность (часы)", "Качество", "Заметки"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
