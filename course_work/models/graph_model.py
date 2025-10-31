@@ -45,13 +45,14 @@ class GraphModel:
 
     # Добавление ребра между двумя точками по их индексам
     def add_edge(self, point1_idx: int, point2_idx: int):
-        # Проверка, что это не петля (точка соединена сама с собой)
+        # Проверяем валидность индексов
+        if (point1_idx < 0 or point1_idx >= len(self.points) or
+                point2_idx < 0 or point2_idx >= len(self.points)):
+            return  # Не добавляем ребро если индексы невалидны
+
         if point1_idx != point2_idx:
-            # Нормализация индексов (меньший индекс first)
             edge = (min(point1_idx, point2_idx), max(point1_idx, point2_idx))
-            # Проверка, что ребро еще не существует
             if edge not in self.edges:
-                # Добавление ребра в список
                 self.edges.append(edge)
 
     # Очистка графа (удаление всех точек и ребер)
