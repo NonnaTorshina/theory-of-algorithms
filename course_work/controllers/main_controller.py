@@ -68,10 +68,17 @@ class MainController:
             self.view.update_results("Выбор точки отменен.")
         else:
             # Выбрана вторая точка - создаем ребро между двумя точками
-            self.add_edge(self.selected_point, point_id)
+            # Сохраняем значение перед сбросом
+            first_point = self.selected_point
+            second_point = point_id
+
+            # Сбрасываем выделение
             self.view.unhighlight_point(self.selected_point)
             self.selected_point = None
-            self.view.update_results(f"Создано ребро: {self.selected_point} → {point_id}")
+
+            # Создаем ребро
+            self.add_edge(first_point, second_point)
+            self.view.update_results(f" Создано ребро: {first_point} → {second_point}")
 
     def switch_to_edge_mode(self):
         """Переключает режим на создание ребер"""
