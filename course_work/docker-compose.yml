@@ -1,0 +1,6 @@
+services:
+  tsp-db:
+    build: .
+    container_name: tsp-db-container
+    environment:
+      - DATABASE_PATH=/app/tsp_results.db
