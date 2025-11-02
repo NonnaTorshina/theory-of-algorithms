@@ -1,0 +1,29 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+История расчётов
+{% endblock %}
+
+{% block content %}
+<h1>История расчётов</h1>
+<p class="lead">Здесь отображаются все ваши предыдущие расчёты.</p>
+
+<div class="card text-dark">
+    <div class="card-body">
+        <h5 class="card-title">Список расчётов</h5>
+        {% if calculations %}
+            <div class="list-group">
+                {% for calc in calculations %}
+                <div class="list-group-item">
+                    <h6 class="mb-1">Расчёт от {{ calc.created_at }}</h6>
+                    <p class="mb-1">Количество вершин: {{ calc.vertices_count }}</p>
+                    <small>Оптимальный путь: {{ calc.optimal_path }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">Расчётов пока нет.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
