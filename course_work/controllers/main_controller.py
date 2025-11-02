@@ -99,11 +99,26 @@ class MainController:
         self.switch_to_point_mode()
 
     def add_point(self, x: float, y: float) -> int:
+        # Проверка на существующие точки перед добавлением
+        for i, existing_point in enumerate(self.model.points):
+            distance = ((existing_point.x - x) ** 2 + (existing_point.y - y) ** 2) ** 0.5
+            if distance < 20.0:  # Минимальное расстояние 20 пикселей
+                self.view.show_error(
+                    f"Точка ({x:.1f}, {y:.1f}) слишком близко к существующей точке {i} "
+                    f"({existing_point.x:.1f}, {existing_point.y:.1f}). "
+                    f"Минимальное расстояние: 20 пикселей"
+                )
+                return None
+
         # Добавление точки в модель и представление
-        point_id = self.model.add_point(x, y)
-        view_point_id = self.view.add_point_to_view(x, y)
-        print(f"Controller: добавлена точка {point_id} в ({x:.1f}, {y:.1f})")
-        return point_id
+        try:
+            point_id = self.model.add_point(x, y)
+            view_point_id = self.view.add_point_to_view(x, y)
+            print(f"Controller: добавлена точка {point_id} в ({x:.1f}, {y:.1f})")
+            return point_id
+        except Exception as e:
+            self.view.show_error(f"Ошибка при добавлении точки: {str(e)}")
+            return None
 
     def add_edge(self, point1_idx: int, point2_idx: int):
         # Добавление ребра между двумя точками (если это не петля)

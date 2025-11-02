@@ -31,9 +31,18 @@ class GraphModel:
         self.edges: List[Tuple[int, int]] = []
         # Матрица расстояний между всеми парами точек
         self.distance_matrix: Optional[List[List[float]]] = None
+        # Минимальное расстояние между точками (в пикселях)
+        self.min_distance = 40.0
 
     # Добавление новой точки в граф
     def add_point(self, x: float, y: float) -> int:
+        # Проверка на существующие точки
+        for i, existing_point in enumerate(self.points):
+            distance = existing_point.distance_to(Point(x, y))
+            if distance < self.min_distance:
+                raise ValueError(
+                    f"Точка ({x:.1f}, {y:.1f}) слишком близко к существующей точке {i} ({existing_point.x:.1f}, {existing_point.y:.1f}). Минимальное расстояние: {self.min_distance}")
+
         # Создание объекта точки
         point = Point(x, y)
         # Добавление точки в список
@@ -42,6 +51,22 @@ class GraphModel:
         self._update_distance_matrix()
         # Возврат индекса добавленной точки
         return len(self.points) - 1
+
+    # Метод для проверки возможности добавления точки
+    def can_add_point(self, x: float, y: float) -> tuple[bool, str]:
+        """Проверяет, можно ли добавить точку без конфликтов"""
+        # Проверка на точное совпадение
+        for i, existing_point in enumerate(self.points):
+            if x == existing_point.x and y == existing_point.y:
+                return False, f"Точка ({x:.1f}, {y:.1f}) уже существует как точка {i}"
+
+        # Проверка на близкое расположение
+        for i, existing_point in enumerate(self.points):
+            distance = existing_point.distance_to(Point(x, y))
+            if distance < self.min_distance:
+                return False, f"Точка ({x:.1f}, {y:.1f}) слишком близко к точке {i} ({existing_point.x:.1f}, {existing_point.y:.1f})"
+
+        return True, "Точка может быть добавлена"
 
     # Добавление ребра между двумя точками по их индексам
     def add_edge(self, point1_idx: int, point2_idx: int):
