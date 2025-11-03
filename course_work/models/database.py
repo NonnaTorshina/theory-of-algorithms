@@ -5,6 +5,7 @@ from typing import List, Tuple, Dict, Any
 import json
 from contextlib import contextmanager
 
+# Класс для управления базой данных результатов решения задачи коммивояжера (TSP)
 class DatabaseManager:
     def __init__(self, db_path: str = None):
         # Используем путь из переменной окружения или по умолчанию
@@ -12,6 +13,7 @@ class DatabaseManager:
         print(f"Database path: {self.db_path}")  # Для отладки
         self._init_database()
 
+    # Контекстный менеджер для работы с подключением к базе данных
     @contextmanager
     def _get_connection(self):
         db_dir = os.path.dirname(self.db_path)
@@ -24,6 +26,7 @@ class DatabaseManager:
         finally:
             conn.close()
 
+    # Инициализация базы данных и создание таблицы, если она не существует
     def _init_database(self):
         # Создаем директорию для БД если не существует
         db_dir = os.path.dirname(self.db_path)
@@ -45,6 +48,7 @@ class DatabaseManager:
             ''')
             conn.commit()
 
+    # Сохранение результата решения задачи коммивояжера в базу данных
     def save_result(self, points_count: int, algorithm_params: Dict[str, Any],
                     path_length: float, path_indices: List[int],
                     computation_time: float):
@@ -64,6 +68,7 @@ class DatabaseManager:
             ))
             conn.commit()
 
+    # Получение всех результатов из базы данных, отсортированных по времени
     def get_all_results(self) -> List[Tuple]:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
@@ -72,6 +77,7 @@ class DatabaseManager:
             ''')
             return cursor.fetchall()
 
+    # Получение результатов по количеству точек, отсортированных по длине пути
     def get_results_by_points_count(self, points_count: int) -> List[Tuple]:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
