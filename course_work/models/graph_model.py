@@ -25,8 +25,7 @@ class Point:
 # Модель графа для представления задачи коммивояжера
 class GraphModel:
     def __init__(self):
-        def __init__(self):
-        #Список вершин графа (точек)
+        # Список вершин графа (точек)
         self.points: List[Point] = []
         # Храним ребра с весами (point1_idx, point2_idx, weight)
         self.edges: List[Tuple[int, int, float]] = []
