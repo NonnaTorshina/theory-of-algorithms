@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 from math import sqrt
 
 # Класс, представляющий точку в двумерном пространстве
@@ -17,7 +17,7 @@ class Point:
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
-    # Хэш-функция для использования точки в множествах и словарях
+    # Хэш-функция для использования точки в множествах и слов
     def __hash__(self):
         return hash((self.x, self.y))
 
@@ -25,10 +25,13 @@ class Point:
 # Модель графа для представления задачи коммивояжера
 class GraphModel:
     def __init__(self):
-        # Список вершин графа (точек)
+        def __init__(self):
+        #Список вершин графа (точек)
         self.points: List[Point] = []
-        # Список ребер графа как пар индексов точек
-        self.edges: List[Tuple[int, int]] = []
+        # Храним ребра с весами (point1_idx, point2_idx, weight)
+        self.edges: List[Tuple[int, int, float]] = []
+        # Словарь для быстрого доступа к весам
+        self.edge_weights: Dict[Tuple[int, int], float] = {}
         # Матрица расстояний между всеми парами точек
         self.distance_matrix: Optional[List[List[float]]] = None
         # Минимальное расстояние между точками (в пикселях)
@@ -41,7 +44,7 @@ class GraphModel:
             distance = existing_point.distance_to(Point(x, y))
             if distance < self.min_distance:
                 raise ValueError(
-                    f"Точка ({x:.1f}, {y:.1f}) слишком близко к существующей точке {i} ({existing_point.x:.1f}, {existing_point.y:.1f}). Минимальное расстояние: {self.min_distance}")
+                    f"Точка ({x:.1f}, {y:.1f}) слишком близко к существующей точке {i}")
 
         # Создание объекта точки
         point = Point(x, y)
@@ -51,59 +54,57 @@ class GraphModel:
         self._update_distance_matrix()
         # Возврат индекса добавленной точки
         return len(self.points) - 1
-
-    # Метод для проверки возможности добавления точки
-    def can_add_point(self, x: float, y: float) -> tuple[bool, str]:
-        """Проверяет, можно ли добавить точку без конфликтов"""
-        # Проверка на точное совпадение
-        for i, existing_point in enumerate(self.points):
-            if x == existing_point.x and y == existing_point.y:
-                return False, f"Точка ({x:.1f}, {y:.1f}) уже существует как точка {i}"
-
-        # Проверка на близкое расположение
-        for i, existing_point in enumerate(self.points):
-            distance = existing_point.distance_to(Point(x, y))
-            if distance < self.min_distance:
-                return False, f"Точка ({x:.1f}, {y:.1f}) слишком близко к точке {i} ({existing_point.x:.1f}, {existing_point.y:.1f})"
-
-        return True, "Точка может быть добавлена"
-
-    # Добавление ребра между двумя точками по их индексам
-    def add_edge(self, point1_idx: int, point2_idx: int):
-        # Проверяем валидность индексов
+    #Добавляет ребро с весом
+    def add_edge(self, point1_idx: int, point2_idx: int, weight: float):
         if (point1_idx < 0 or point1_idx >= len(self.points) or
                 point2_idx < 0 or point2_idx >= len(self.points)):
-            return  # Не добавляем ребро если индексы невалидны
+            return
 
-        if point1_idx != point2_idx:
-            edge = (min(point1_idx, point2_idx), max(point1_idx, point2_idx))
-            if edge not in self.edges:
-                self.edges.append(edge)
+        if point1_idx == point2_idx:
+            return
 
-    # Очистка графа (удаление всех точек и ребер)
-    def clear(self):
-        # Очистка списка точек
-        self.points.clear()
-        # Очистка списка ребер
-        self.edges.clear()
-        # Сброс матрицы расстояний
-        self.distance_matrix = None
+        # Нормализуем индексы
+        idx1, idx2 = min(point1_idx, point2_idx), max(point1_idx, point2_idx)
 
+        # Удаляем старое ребро если существует
+        self.edges = [e for e in self.edges if not (e[0] == idx1 and e[1] == idx2)]
+
+        # Добавляем новое ребро с весом
+        edge = (idx1, idx2, weight)
+        self.edges.append(edge)
+        self.edge_weights[(idx1, idx2)] = weight
+
+        # Обновляем матрицу расстояний
+        self._update_distance_matrix()
+    #Возвращает вес ребра между двумя точками
+    def get_edge_weight(self, point1_idx: int, point2_idx: int) -> Optional[float]:
+
+        idx1, idx2 = min(point1_idx, point2_idx), max(point1_idx, point2_idx)
+        return self.edge_weights.get((idx1, idx2))
     # Обновление матрицы расстояний между всеми точками
     def _update_distance_matrix(self):
         # Количество точек в графе
         n = len(self.points)
         # Инициализация матрицы нулями
         self.distance_matrix = [[0.0] * n for _ in range(n)]
-
         # Заполнение матрицы расстояний
         for i in range(n):
             for j in range(i + 1, n):
-                # Вычисление расстояния между точками i и j
-                distance = self.points[i].distance_to(self.points[j])
-                # Заполнение обоих направлений (матрица симметрична)
+                # Используем пользовательский вес если ребро существует, иначе евклидово расстояние
+                weight = self.get_edge_weight(i, j)
+                if weight is not None:
+                    distance = weight
+                else:
+                    distance = self.points[i].distance_to(self.points[j])
+
                 self.distance_matrix[i][j] = distance
                 self.distance_matrix[j][i] = distance
+
+    def clear(self):
+        self.points.clear()
+        self.edges.clear()
+        self.edge_weights.clear()
+        self.distance_matrix = None
 
     # Получение списка координат всех точек
     def get_points(self) -> List[Tuple[float, float]]:
