@@ -3,7 +3,7 @@ import json
 from .tsp_solver import solve_tsp_aco
 from .tsp_db import save_calculation, get_all_calculations
 
-
+# Функция представления для решения задачи коммивояжера
 def tsp(request):
     if request.method == 'POST':
         try:
@@ -14,7 +14,7 @@ def tsp(request):
             # Получаем данные из формы
             vertices_json = request.POST.get('vertices', '[]')
             print(f"Получены вершины JSON: {vertices_json}")
-
+            # Проверка на пустые данные вершин
             if not vertices_json or vertices_json == '[]':
                 print("ОШИБКА: vertices пустые!")
                 error_result = {
@@ -24,7 +24,7 @@ def tsp(request):
                     'execution_time': 0
                 }
                 return render(request, 'main/tsp.html', {'result': error_result})
-
+            # Парсинг JSON данных вершин
             vertices_data = json.loads(vertices_json)
             print(f"Распарсено вершин: {len(vertices_data)}")
 
@@ -77,7 +77,7 @@ def tsp(request):
             )
 
             print(f"Сохранено в БД с ID: {calculation_id}")
-
+            # Добавляем ID расчета и вершины в результат
             result['calculation_id'] = calculation_id
             result['vertices'] = points
 
@@ -97,19 +97,20 @@ def tsp(request):
             }
             return render(request, 'main/tsp.html', {'result': error_result})
     else:
+        # Обработка GET запроса - отображение пустой формы
         print("GET запрос - показываем пустую форму")
         return render(request, 'main/tsp.html')
 
 
-
+# Функция представления для отображения истории расчетов
 def history(request):
     calculations = get_all_calculations()
     return render(request, 'main/history.html', {'calculations': calculations})
 
-
+# Функция представления для главной страницы
 def index(request):
     return render(request, 'main/index.html')
 
-
+# Функция представления для страницы алгоритма TSP
 def tsp_algorythm(request):
     return render(request, 'main/tsp.html')
