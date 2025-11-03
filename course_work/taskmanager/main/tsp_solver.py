@@ -7,18 +7,25 @@ from math import inf, sqrt
 from random import random, shuffle
 from typing import List, Tuple
 
-
+# Класс реализации муравьиного алгоритма для задачи коммивояжера
 class ACOAlgorithm:
     def __init__(self, ants: int = 100, iterations: int = 20,
                  alpha: float = 1.5, beta: float = 1.2,
                  rho: float = 0.6, q: float = 10):
+        # Количество муравьев в колонии
         self.ants = ants
+        # Количество итераций алгоритма
         self.iterations = iterations
+        # Параметр влияния феромона на выбор пути
         self.alpha = alpha
+        # Параметр влияния эвристической информации на выбор пути
         self.beta = beta
+        # Коэффициент испарения феромона
         self.rho = rho
+        # Параметр количества феромона
         self.q = q
 
+    # Статический метод для выбора следующего узла на основе вероятностей
     @staticmethod
     def _select_index(selection: List[float]) -> int:
         sum_num = sum(selection)
@@ -32,6 +39,7 @@ class ACOAlgorithm:
                 return i
         return len(selection) - 1
 
+    # Метод создания пути для одного муравья
     def _create_path(self, distance_matrix: List[List[float]],
                      pheromone_matrix: List[List[float]]) -> List[int]:
         n = len(distance_matrix)
@@ -54,6 +62,7 @@ class ACOAlgorithm:
         visited_indices.append(visited_indices[0])
         return visited_indices
 
+    # Метод обновления матрицы феромонов после итерации
     def _update_pheromone(self, pheromone_matrix: List[List[float]],
                           paths: List[List[int]], lengths: List[float]) -> None:
         n = len(pheromone_matrix)
@@ -71,6 +80,7 @@ class ACOAlgorithm:
                 pheromone_matrix[i][j] += delta
                 pheromone_matrix[j][i] += delta
 
+    # Статический метод вычисления длины пути
     @staticmethod
     def _calculate_path_length(distance_matrix: List[List[float]],
                                path: List[int]) -> float:
@@ -79,6 +89,7 @@ class ACOAlgorithm:
             total_length += distance_matrix[path[i]][path[i + 1]]
         return total_length
 
+    # Основной метод решения задачи коммивояжера
     def solve_tsp(self, points: List[Tuple[float, float]]) -> dict:
         if len(points) < 3:
             raise ValueError("Need at least 3 points for TSP")
@@ -120,36 +131,17 @@ class ACOAlgorithm:
             convergence_data.append(best_length)
             self._update_pheromone(pheromone_matrix, paths, lengths)
 
-        # Создание графика сходимости
-        plt.figure(figsize=(8, 4))
-        plt.plot(convergence_data)
-        plt.title('График сходимости алгоритма')
-        plt.xlabel('Итерация')
-        plt.ylabel('Длина лучшего пути')
-        plt.grid(True)
-
-        # Конвертация графика в base64 для отображения в HTML
-        buffer = BytesIO()
-        plt.savefig(buffer, format='png')
-        buffer.seek(0)
-        image_png = buffer.getvalue()
-        buffer.close()
-        convergence_chart = base64.b64encode(image_png).decode('utf-8')
-        plt.close()
-
         return {
             'optimal_path': best_path,
             'distance': round(best_length, 2),
             'iterations': self.iterations,
             'vertices_count': n,
-            'convergence_chart': convergence_chart,
             'vertices': points
         }
 
-
+#Функция-обертка для решения TSP
 def solve_tsp_aco(vertices_data, ant_count=10, iterations=100,
                   alpha=1.0, beta=2.0, evaporation=0.5, q=100):
-    """Функция-обертка для решения TSP"""
     start_time = time.time()
 
     # Создаем экземпляр алгоритма
