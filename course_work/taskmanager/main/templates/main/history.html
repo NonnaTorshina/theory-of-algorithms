@@ -15,14 +15,37 @@
             <div class="list-group">
                 {% for calc in calculations %}
                 <div class="list-group-item">
-                    <h6 class="mb-1">Расчёт от {{ calc.created_at }}</h6>
-                    <p class="mb-1">Количество вершин: {{ calc.vertices_count }}</p>
-                    <small>Оптимальный путь: {{ calc.optimal_path }}</small>
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">Расчёт #{{ calc.id }} от {{ calc.created_at }}</h6>
+                        <small class="text-muted">{{ calc.vertices_count }} вершин</small>
+                    </div>
+                    <p class="mb-1">
+                        <strong>Длина маршрута:</strong> {{ calc.distance|floatformat:2 }} |
+                        <strong>Время:</strong> {{ calc.execution_time|floatformat:2 }} сек
+                    </p>
+                    <small class="text-muted">
+                        <strong>Параметры:</strong>
+                        {{ calc.parameters.ant_count }} муравьев,
+                        α={{ calc.parameters.alpha }}, β={{ calc.parameters.beta }}
+                    </small>
+                    <div class="mt-2">
+                        <small><strong>Путь:</strong>
+                        {% for vertex in calc.optimal_path %}
+                            {{ vertex }}{% if not forloop.last %} → {% endif %}
+                        {% endfor %}
+                        </small>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
         {% else %}
-            <p class="text-muted">Расчётов пока нет.</p>
+            <div class="text-center py-4">
+                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Расчётов пока нет.</p>
+                <a href="{% url 'tsp-algorythm' %}" class="btn btn-primary">
+                    <i class="fas fa-calculator"></i> Сделать первый расчет
+                </a>
+            </div>
         {% endif %}
     </div>
 </div>
