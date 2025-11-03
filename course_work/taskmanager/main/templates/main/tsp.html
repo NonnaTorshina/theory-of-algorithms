@@ -9,7 +9,7 @@
 <p class="lead">В окне ниже добавьте вершины графа кликом мыши и найдите оптимальный маршрут.</p>
 
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-7">
         <div class="card text-white k mb-4">
             <div class="card-header bg-light text-white">
                 <h5 class="card-title mb-0">Поле для добавления вершин</h5>
@@ -21,7 +21,7 @@
                 </div>
 
                 <div id="graphCanvasContainer" class="text-center">
-                    <canvas id="graphCanvas" width="600" height="400"
+                    <canvas id="graphCanvas" width="750" height="700"
                             style="border: 2px solid #dee2e6; cursor: crosshair; background-color: white; border-radius: 8px;">
                         Ваш браузер не поддерживает Canvas
                     </canvas>
@@ -49,7 +49,7 @@
                 <h5 class="card-title mb-0">Настройки алгоритма муравьиной колонии</h5>
             </div>
             <div class="card-body">
-                <form id="tspForm" method="post">
+              <form id="tspForm" method="post" action="{% url 'tsp' %}">
                     {% csrf_token %}
 
                     <!-- Скрытое поле для координат вершин -->
@@ -130,7 +130,7 @@
             <div class="card-body">
                 <p class="small mb-2"><strong>Муравьиный алгоритм</strong> имитирует поведение муравьев,
                 которые находят кратчайший путь к пище с помощью феромонов.</p>
-                <p class="small mb-0">Каждый муравьй строит свой маршрут, а затем обновляет феромоны
+                <p class="small mb-0">Каждый муравей строит свой маршрут, а затем обновляет феромоны
                 на пути в зависимости от его длины.</p>
             </div>
         </div>
@@ -194,38 +194,21 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-6">
-                    <h6><i class="fas fa-chart-line"></i> График сходимости:</h6>
-                    {% if result.convergence_chart %}
-                        <img src="data:image/png;base64,{{ result.convergence_chart }}"
-                             alt="График сходимости алгоритма" class="img-fluid rounded border">
-                        <p class="small text-muted mt-1">График показывает изменение длины лучшего маршрута по итерациям</p>
-                    {% else %}
-                        <div class="alert alert-warning">
-                            График сходимости недоступен
-                        </div>
-                    {% endif %}
-                </div>
             </div>
 
-            <!-- Визуализация графа с решением -->
-            <div class="mt-4">
-                <h6><i class="fas fa-project-diagram"></i> Визуализация решения:</h6>
-                <div class="text-center">
-                    <canvas id="resultCanvas" width="600" height="400"
-                            style="border: 2px solid #dee2e6; background-color: white; border-radius: 8px;">
-                    </canvas>
-                </div>
-                <p class="small text-muted text-center mt-2">
-                    Зеленые линии показывают оптимальный маршрут, красные точки - вершины графа
-                </p>
-            </div>
-
+            <p class="small text-muted text-center mt-2">
+                Зеленые линии на основном поле показывают оптимальный маршрут
+            </p>
             <div class="mt-3 text-center">
+                {% if result.calculation_id %}
+                <button class="btn btn-outline-success me-2">
+                    <i class="fas fa-save"></i> Расчет сохранен (#{{ result.calculation_id }})
+                </button>
+                {% else %}
                 <button class="btn btn-outline-success me-2" onclick="saveCalculation()">
                     <i class="fas fa-save"></i> Сохранить расчет
                 </button>
+                {% endif %}
                 <button class="btn btn-outline-primary" onclick="clearAndNew()">
                     <i class="fas fa-plus"></i> Новый расчет
                 </button>
@@ -247,6 +230,17 @@
         let pointRadius = 8;
         const pointColor = '#495057';
         const pointBorderColor = '#212529';
+
+        // Восстанавливаем точки из sessionStorage при загрузке
+        try {
+            const savedVertices = sessionStorage.getItem('tspVertices');
+            if (savedVertices) {
+                vertices = JSON.parse(savedVertices);
+                redrawPoints();
+            }
+        } catch (e) {
+            console.log('Не удалось восстановить точки:', e);
+        }
 
         // Отрисовка точки с номером
         function drawPoint(x, y, index) {
@@ -277,6 +271,9 @@
                 drawPoint(vertex.x, vertex.y, index);
             });
             updatePointCount();
+
+            // Сохраняем точки в sessionStorage
+            sessionStorage.setItem('tspVertices', JSON.stringify(vertices));
         }
 
         // Обновление счетчика точек и скрытого поля
@@ -285,7 +282,6 @@
             pointCountSpan.textContent = `Вершин: ${count}`;
             verticesInput.value = JSON.stringify(vertices);
 
-            // Изменяем цвет счетчика в зависимости от количества точек
             if (count < 3) {
                 pointCountSpan.className = 'badge bg-warning fs-6';
             } else {
@@ -302,7 +298,6 @@
             const x = (event.clientX - rect.left) * scaleX;
             const y = (event.clientY - rect.top) * scaleY;
 
-            // Проверяем, не кликаем ли слишком близко к существующей точке
             const tooClose = vertices.some(vertex => {
                 const distance = Math.sqrt((vertex.x - x) ** 2 + (vertex.y - y) ** 2);
                 return distance < pointRadius * 3;
@@ -312,13 +307,11 @@
                 vertices.push({x: Math.round(x), y: Math.round(y)});
                 redrawPoints();
 
-                // Анимация добавления
                 canvas.style.transform = 'scale(1.02)';
                 setTimeout(() => {
                     canvas.style.transform = 'scale(1)';
                 }, 150);
             } else {
-                // Анимация запрета
                 canvas.style.boxShadow = '0 0 10px red';
                 setTimeout(() => {
                     canvas.style.boxShadow = 'none';
@@ -332,6 +325,7 @@
                 if (confirm('Вы уверены, что хотите очистить все вершины?')) {
                     vertices = [];
                     redrawPoints();
+                    sessionStorage.removeItem('tspVertices');
                 }
             }
         });
@@ -346,21 +340,17 @@
 
         // Валидация формы перед отправкой
         document.getElementById('tspForm').addEventListener('submit', function(event) {
+            verticesInput.value = JSON.stringify(vertices);
+
             if (vertices.length < 3) {
                 event.preventDefault();
                 showAlert('Для решения задачи нужно добавить как минимум 3 вершины!', 'warning');
                 return;
             }
 
-            // Показываем индикатор загрузки
             const solveBtn = document.getElementById('solveBtn');
             solveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Решаем задачу...';
             solveBtn.disabled = true;
-
-            // Добавляем небольшую задержку для отображения спиннера
-            setTimeout(() => {
-                // Форма будет отправлена
-            }, 100);
         });
 
         // Показ всплывающих сообщений
@@ -381,7 +371,6 @@
 
             document.querySelector('.card-body').prepend(alertDiv);
 
-            // Автоматическое скрытие через 5 секунд
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.remove();
@@ -389,27 +378,23 @@
             }, 5000);
         }
 
-        // Если есть результат, отрисовываем граф с решением
-        {% if result and not result.error %}
-            drawSolution({{ result.optimal_path|safe }}, {{ result.vertices|safe }});
-        {% endif %}
+        // Функция отрисовки решения на основном canvas
+        function drawSolution(path) {
+            console.log('Отрисовка пути:', path);
+            console.log('Текущие вершины:', vertices);
 
-        // Функция отрисовки решения на отдельном canvas
-        function drawSolution(path, vertices) {
-            const resultCanvas = document.getElementById('resultCanvas');
-            if (!resultCanvas) return;
+            if (!path || path.length === 0) {
+                console.error('Путь пустой');
+                return;
+            }
 
-            const resultCtx = resultCanvas.getContext('2d');
+            // Рисуем ребра оптимального пути поверх существующих точек
+            ctx.strokeStyle = '#28a745';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
 
-            // Очищаем canvas
-            resultCtx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
-
-            // Рисуем ребра оптимального пути
-            resultCtx.strokeStyle = '#28a745';
-            resultCtx.lineWidth = 3;
-            resultCtx.lineJoin = 'round';
-            resultCtx.lineCap = 'round';
-
+            // Рисуем все ребра пути
             for (let i = 0; i < path.length - 1; i++) {
                 const currentIdx = path[i];
                 const nextIdx = path[i + 1];
@@ -418,45 +403,55 @@
                     const current = vertices[currentIdx];
                     const next = vertices[nextIdx];
 
-                    resultCtx.beginPath();
-                    resultCtx.moveTo(current[0], current[1]);
-                    resultCtx.lineTo(next[0], next[1]);
-                    resultCtx.stroke();
+                    console.log(`Рисую линию от ${currentIdx} к ${nextIdx}:`, current, '->', next);
+
+                    ctx.beginPath();
+                    ctx.moveTo(current.x, current.y);
+                    ctx.lineTo(next.x, next.y);
+                    ctx.stroke();
                 }
             }
 
-            // Рисуем точки
-            vertices.forEach((vertex, index) => {
-                const [x, y] = vertex;
+            // Замыкаем путь (последняя точка с первой)
+            if (path.length > 1) {
+                const firstIdx = path[0];
+                const lastIdx = path[path.length - 1];
 
-                // Внешний круг
-                resultCtx.fillStyle = '#dc3545';
-                resultCtx.beginPath();
-                resultCtx.arc(x, y, pointRadius + 2, 0, 2 * Math.PI);
-                resultCtx.fill();
+                if (firstIdx < vertices.length && lastIdx < vertices.length) {
+                    const first = vertices[firstIdx];
+                    const last = vertices[lastIdx];
 
-                // Внутренний круг
-                resultCtx.fillStyle = '#ff6b6b';
-                resultCtx.beginPath();
-                resultCtx.arc(x, y, pointRadius, 0, 2 * Math.PI);
-                resultCtx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(last.x, last.y);
+                    ctx.lineTo(first.x, first.y);
+                    ctx.stroke();
+                }
+            }
 
-                // Номер точки
-                resultCtx.fillStyle = 'white';
-                resultCtx.font = 'bold 12px Arial';
-                resultCtx.textAlign = 'center';
-                resultCtx.textBaseline = 'middle';
-                resultCtx.fillText(index + 1, x, y);
-            });
+            console.log('Путь успешно отрисован!');
         }
+
+        // Если есть результат, отрисовываем граф с решением
+        {% if result and not result.error %}
+            console.log('=== ЕСТЬ РЕЗУЛЬТАТ ===');
+            console.log('Optimal path:', {{ result.optimal_path|safe }});
+
+            // Ждем полной загрузки и отрисовки точек, затем рисуем путь
+            setTimeout(() => {
+                console.log('Запускаю отрисовку пути...');
+                drawSolution({{ result.optimal_path|safe }});
+            }, 200);
+        {% endif %}
     });
 
     // Вспомогательные функции
     function clearAndRetry() {
+        sessionStorage.removeItem('tspVertices');
         window.location.reload();
     }
 
     function clearAndNew() {
+        sessionStorage.removeItem('tspVertices');
         window.location.href = "{% url 'tsp-algorythm' %}";
     }
 
