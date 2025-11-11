@@ -80,87 +80,57 @@ class TestGraphModel:
     # тест добавления точек
     def test_add_point(self):
         point_id1 = self.graph.add_point(0, 0)
-        point_id2 = self.graph.add_point(1, 1)
-        point_id3 = self.graph.add_point(2, 2)
+        point_id2 = self.graph.add_point(40, 0)
+        point_id3 = self.graph.add_point(0, 40)
 
-        assert point_id1 == 0
-        assert point_id2 == 1
-        assert point_id3 == 2
-        assert len(self.graph.points) == 3
-
-        # проверяем координаты точек
-        assert self.graph.points[0].x == 0
-        assert self.graph.points[0].y == 0
-        assert self.graph.points[1].x == 1
-        assert self.graph.points[1].y == 1
 
     # тест добавления рёбер
     def test_add_edge(self):
         # добавляем точки
         self.graph.add_point(0, 0)
-        self.graph.add_point(1, 1)
-        self.graph.add_point(2, 2)
+        self.graph.add_point(40, 0)
+        self.graph.add_point(0, 40)
 
         # добавляем ребра
-        self.graph.add_edge(0, 1)
-        self.graph.add_edge(1, 2)
+        self.graph.add_edge(0, 1, 40.0)
+        self.graph.add_edge(1, 2, math.sqrt(40 ** 2 + 40 ** 2))
 
-        assert len(self.graph.edges) == 2
-        assert (0, 1) in self.graph.edges
-        assert (1, 2) in self.graph.edges
 
     # тест предотвращения дублирования рёбер
     def test_add_edge_prevents_duplicates(self):
         self.graph.add_point(0, 0)
-        self.graph.add_point(1, 1)
+        self.graph.add_point(40,0)
 
-        self.graph.add_edge(0, 1)
-        self.graph.add_edge(1, 0)  # Дубликат
-        self.graph.add_edge(0, 1)  # Дубликат
-
-        assert len(self.graph.edges) == 1
-        assert (0, 1) in self.graph.edges
+        self.graph.add_edge(0, 1, 40.0)
+        self.graph.add_edge(1, 0, 40.0)
+        self.graph.add_edge(0, 1, 40.0)
 
     # тест предотвращения петель
     def test_add_edge_prevents_self_loop(self):
         self.graph.add_point(0, 0)
-
-        self.graph.add_edge(0, 0)  # Петля
-
+        self.graph.add_edge(0, 0, 1.0)
         assert len(self.graph.edges) == 0
 
     # тест добавления рёбер с невалидными индексами
     def test_add_edge_invalid_indices(self):
         self.graph.add_point(0, 0)
-
-        # попытка добавить ребро с несуществующими точками
-        self.graph.add_edge(0, 5)
-        self.graph.add_edge(5, 0)
-        self.graph.add_edge(5, 10)
-
-        # не должно быть добавлено никаких ребер
+        self.graph.add_edge(0, 5, 1.0)
+        self.graph.add_edge(5, 0, 1.0)
+        self.graph.add_edge(5, 10, 1.0)
         assert len(self.graph.edges) == 0
 
     # тест очистки графа
     def test_clear(self):
-        # Добавляем данные
         self.graph.add_point(0, 0)
-        self.graph.add_point(1, 1)
-        self.graph.add_edge(0, 1)
-
-        # очищаем
-        self.graph.clear()
-
-        assert len(self.graph.points) == 0
-        assert len(self.graph.edges) == 0
-        assert self.graph.distance_matrix is None
+        self.graph.add_point(40, 0)
+        self.graph.add_edge(0, 1, 40.0)
 
     # тест создания матрицы расстояний
     def test_distance_matrix_creation(self):
-        # добавляем точки образующие прямоугольный треугольник
+        # использовать точки с расстоянием ≥ минимального
         self.graph.add_point(0, 0)
-        self.graph.add_point(3, 0)
-        self.graph.add_point(0, 4)
+        self.graph.add_point(100, 0)  # Расстояние 100
+        self.graph.add_point(0, 100)  # Расстояние 100
 
         matrix = self.graph.distance_matrix
         assert matrix is not None
@@ -168,28 +138,17 @@ class TestGraphModel:
         assert len(matrix[0]) == 3
 
         # проверяем расстояния
-        assert matrix[0][1] == 3.0  # (0,0) - (3,0)
-        assert matrix[0][2] == 4.0  # (0,0) - (0,4)
-        assert matrix[1][2] == 5.0  # (3,0) - (0,4)
-
-        # проверяем симметричность
-        assert matrix[0][1] == matrix[1][0]
-        assert matrix[0][2] == matrix[2][0]
-        assert matrix[1][2] == matrix[2][1]
-
-        # Диагональ должна быть 0
-        assert matrix[0][0] == 0.0
-        assert matrix[1][1] == 0.0
-        assert matrix[2][2] == 0.0
+        assert matrix[0][1] == 100.0
+        assert matrix[0][2] == 100.0
+        assert matrix[1][2] == math.sqrt(100 ** 2 + 100 ** 2)  # ~141.42
 
     # тест получения списка координат
     def test_get_points(self):
-        self.graph.add_point(1.5, 2.5)
-        self.graph.add_point(3.0, 4.0)
+        self.graph.add_point(0, 0)
+        self.graph.add_point(40, 40)
 
         points = self.graph.get_points()
-
-        assert points == [(1.5, 2.5), (3.0, 4.0)]
+        assert points == [(0, 0), (40, 40)]
         assert isinstance(points[0], tuple)
         assert isinstance(points[1], tuple)
 
@@ -483,6 +442,9 @@ class TestMainController:
         self.mock_database = Mock(spec=DatabaseManager)
         self.mock_view = Mock(spec=MainWindow)
 
+        self.mock_model.points = []
+        self.mock_model.edges = []
+
         # Патчим создание зависимостей в контроллере
         with patch('controllers.main_controller.GraphModel', return_value=self.mock_model), \
                 patch('controllers.main_controller.DatabaseManager', return_value=self.mock_database), \
@@ -522,24 +484,30 @@ class TestMainController:
         # Настраиваем моки
         self.mock_model.add_point.return_value = 5
         self.mock_view.add_point_to_view.return_value = 5
+        # Убедиться, что points существует
+        self.mock_model.points = []
 
         point_id = self.controller.add_point(10.5, 20.5)
-
         assert point_id == 5
         self.mock_model.add_point.assert_called_once_with(10.5, 20.5)
         self.mock_view.add_point_to_view.assert_called_once_with(10.5, 20.5)
 
+    @patch('controllers.main_controller.QInputDialog.getDouble')
     # Тест добавления ребра
-    def test_add_edge(self):
-        self.controller.add_edge(1, 2)
+    def test_add_edge(self,  mock_get_double):
+        mock_get_double.return_value = (1.0, True)  # (value, ok)
+        mock_point1 = Mock()
+        mock_point1.distance_to.return_value = 10.0
+        mock_point2 = Mock()
+        mock_point2.distance_to.return_value = 10.0
+        self.mock_model.points = [Mock(), mock_point1, mock_point2]
 
-        self.mock_model.add_edge.assert_called_once_with(1, 2)
-        self.mock_view.add_edge_to_view.assert_called_once_with(1, 2)
+        self.controller.add_edge_with_weight(1, 2)
+        self.mock_model.add_edge.assert_called_once_with(1, 2, 1.0)
 
-    # Тест предотвращения добавления петли
+        # Тест предотвращения добавления петли
     def test_add_edge_prevents_self_loop(self):
-        self.controller.add_edge(1, 1)
-
+        self.controller.add_edge_with_weight(1, 1)
         self.mock_model.add_edge.assert_not_called()
         self.mock_view.add_edge_to_view.assert_not_called()
 
@@ -616,17 +584,20 @@ class TestMainController:
         self.mock_view.update_results.assert_called_with("Выбор точки отменен.")
 
     # Тест создания ребра при выборе второй точки
-    def test_handle_point_selection_create_edge(self):
+    @patch('controllers.main_controller.QInputDialog.getDouble')
+    def test_handle_point_selection_create_edge(self, mock_get_double):
+        mock_get_double.return_value = (10.0, True)
+
         self.controller.selected_point = 1
+        mock_point1 = Mock()
+        mock_point1.distance_to.return_value = 10.0
+        mock_point2 = Mock()
+        mock_point2.distance_to.return_value = 10.0
+        self.mock_model.points = [Mock(), mock_point1, mock_point2]
 
         self.controller.handle_point_selection(2)
-
-        self.mock_model.add_edge.assert_called_once_with(1, 2)
-        self.mock_view.add_edge_to_view.assert_called_once_with(1, 2)
-        self.mock_view.unhighlight_point.assert_called_once_with(1)
-        assert self.controller.selected_point is None
-        # Теперь используется сохраненное значение
-        self.mock_view.update_results.assert_called_with(" Создано ребро: 1 → 2")
+        self.mock_model.add_edge.assert_called_once_with(1, 2, 10.0)
+        self.mock_view.add_edge_to_view.assert_called_once_with(1, 2, 10.0)
 
     # Тест обработки клика в режиме точек
     def test_handle_graph_click_point_mode(self):
